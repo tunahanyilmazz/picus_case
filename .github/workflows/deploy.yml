@@ -24,10 +24,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Check Python availability
+      run: |
+        python3 --version || echo "Python3 not found"
+        which python3 || echo "python3 not in PATH"
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
+    
+    - name: Verify Python installation
+      run: |
+        python --version
+        which python
     
     - name: Install dependencies
       run: |
