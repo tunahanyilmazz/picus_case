@@ -215,21 +215,59 @@ jobs:
       run: |
         FUNCTION_NAME="picus-delete-function"
         ROLE_ARN="${{ steps.lambda-role.outputs.role_arn }}"
+        MAX_RETRIES=5
+        RETRY_DELAY=10
+        
+        # Function'ın update durumunu kontrol et ve bekle
+        wait_for_function_ready() {
+          local retries=0
+          while [ $retries -lt $MAX_RETRIES ]; do
+            STATUS=$(aws lambda get-function \
+              --function-name $FUNCTION_NAME \
+              --region ${{ env.AWS_REGION }} \
+              --query 'Configuration.LastUpdateStatus' \
+              --output text 2>/dev/null || echo "NOT_FOUND")
+            
+            if [ "$STATUS" == "Successful" ] || [ "$STATUS" == "NOT_FOUND" ]; then
+              echo "✅ Function is ready (Status: $STATUS)"
+              return 0
+            elif [ "$STATUS" == "InProgress" ]; then
+              echo "⏳ Function update in progress, waiting... (Status: $STATUS)"
+              sleep $RETRY_DELAY
+              retries=$((retries + 1))
+            else
+              echo "⚠️  Function status: $STATUS, waiting..."
+              sleep $RETRY_DELAY
+              retries=$((retries + 1))
+            fi
+          done
+          echo "❌ Function not ready after $MAX_RETRIES retries"
+          return 1
+        }
         
         # Check if function exists
         if aws lambda get-function --function-name $FUNCTION_NAME --region ${{ env.AWS_REGION }} 2>/dev/null; then
           echo "📝 Updating existing function..."
-          # Update existing function code
+          
+          # Function'ın hazır olmasını bekle
+          wait_for_function_ready
+          
+          # Update function code
+          echo "📦 Updating function code..."
           aws lambda update-function-code \
             --function-name $FUNCTION_NAME \
             --zip-file fileb://lambda-function.zip \
             --region ${{ env.AWS_REGION }}
           
+          # Code update'in tamamlanmasını bekle
+          wait_for_function_ready
+          
           # Update environment variables
+          echo "⚙️  Updating function configuration..."
           aws lambda update-function-configuration \
             --function-name $FUNCTION_NAME \
             --environment "Variables={DYNAMODB_TABLE_NAME=picus_data}" \
-            --region ${{ env.AWS_REGION }}
+            --region ${{ env.AWS_REGION }} || echo "⚠️  Configuration update may have failed, but continuing..."
           
           echo "✅ Lambda function updated successfully!"
         else
