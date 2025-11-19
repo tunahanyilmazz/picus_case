@@ -40,6 +40,7 @@ jobs:
         python test_app.py
       env:
         DYNAMODB_TABLE_NAME: picus_data
+        AWS_DEFAULT_REGION: eu-central-1
 
   build-and-deploy:
     name: Build Docker Image and Deploy
