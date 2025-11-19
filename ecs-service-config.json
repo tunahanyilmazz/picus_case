@@ -1,0 +1,29 @@
+{
+  "serviceName": "picus-flask-service",
+  "cluster": "picus-cluster",
+  "taskDefinition": "picus-task-definition",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-00bb55d610b0e6ec6",
+        "subnet-0e439a3ca93ec05a5"
+      ],
+      "securityGroups": [
+        "sg-0958ff86169bce8ed"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
+  },
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100,
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    }
+  },
+  "healthCheckGracePeriodSeconds": 60
+}
+

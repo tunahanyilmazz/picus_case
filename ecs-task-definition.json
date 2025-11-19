@@ -1,0 +1,47 @@
+{
+  "family": "picus-task-definition",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::824912998004:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::824912998004:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "picus-flask-app",
+      "image": "824912998004.dkr.ecr.eu-central-1.amazonaws.com/picus-flask-app:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "DYNAMODB_TABLE_NAME",
+          "value": "picus_data"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/picus-flask-app",
+          "awslogs-region": "eu-central-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/picus/list || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}
+

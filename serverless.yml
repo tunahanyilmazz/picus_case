@@ -1,0 +1,32 @@
+service: picus-delete-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.10
+  region: eu-central-1 # Choose your desired AWS region
+  # Proper IAM Role/Policy Configuration
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            # Only need delete, get, and query for a simple delete operation with response check
+            - dynamodb:DeleteItem
+            - dynamodb:GetItem
+          Resource: "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/picus_data"
+  environment:
+    DYNAMODB_TABLE_NAME: picus_data
+
+functions:
+  deleteItem:
+    handler: handler.delete_item
+    events:
+      - http:
+          path: picus/{key}
+          method: delete
+          integration: lambda-proxy
+          cors: true # For simplicity
+
+# Deployment Command:
+# sls deploy
