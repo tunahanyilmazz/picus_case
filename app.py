@@ -61,6 +61,11 @@ def get_item(key):
         app.logger.error(f"Error getting item: {e}")
         return jsonify({"error": "Could not retrieve item"}), 500
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for ECS."""
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == '__main__':
     # When running locally, it's safer to not rely on the OS environment for the port.
     port = int(os.environ.get('PORT', 8080))

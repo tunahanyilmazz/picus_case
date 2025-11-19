@@ -1,0 +1,7 @@
+{
+  "pathParameters": {
+    "key": "test-123"
+  },
+  "httpMethod": "DELETE",
+  "path": "/picus/test-123"
+}

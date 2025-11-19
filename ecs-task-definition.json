@@ -34,7 +34,7 @@
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "curl -f http://localhost:8080/picus/list || exit 1"
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/health').read()\" || exit 1"
         ],
         "interval": 30,
         "timeout": 5,
