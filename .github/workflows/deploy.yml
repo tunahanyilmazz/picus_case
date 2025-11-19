@@ -42,11 +42,21 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
+        echo "Installing requirements..."
+        pip install -r requirements.txt || echo "Failed to install requirements"
+        echo "Installing pytest..."
+        pip install pytest pytest-cov || echo "Failed to install pytest"
+        echo "Verifying installations..."
+        pip list | grep -E "(Flask|boto3|gunicorn|pytest)"
     
     - name: Run tests
       run: |
+        echo "Running tests..."
+        echo "Python version: $(python --version)"
+        echo "Working directory: $(pwd)"
+        echo "Files in directory:"
+        ls -la
+        echo "Running test_app.py..."
         python test_app.py
       env:
         DYNAMODB_TABLE_NAME: picus_data
