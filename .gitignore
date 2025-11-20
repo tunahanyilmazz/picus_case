@@ -1,9 +1,17 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+*.pyd
 *$py.class
 *.so
 .Python
+
+# Utility Python files
+*util*.py
+*_util.py
+util_*.py
 build/
 develop-eggs/
 dist/
@@ -19,6 +27,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-log.txt
+pip-delete-this-directory.txt
+.python-version
 
 # Virtual Environment
 venv/
@@ -52,3 +63,32 @@ Thumbs.db
 .env
 .env.local
 
+# Makefiles
+*.mk
+*.sh
+
+# Lambda deployment packages
+lambda-function.zip
+boto3/
+botocore/
+urllib3/
+dateutil/
+s3transfer/
+jmespath/
+jsonschema/
+python-dateutil/
+six.py/
+urllib3/
+botocore/
+boto3/
+s3transfer/
+jmespath/
+jsonschema/
+python-dateutil/
+six.py/
+urllib3/
+*.dist-info/
+
+/bin
+six.py
+*.json

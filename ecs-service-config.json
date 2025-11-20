@@ -16,6 +16,13 @@
       "assignPublicIp": "ENABLED"
     }
   },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:eu-central-1:824912998004:targetgroup/picus-ecs-tg/cefd50e6b09b345b",
+      "containerName": "picus-flask-app",
+      "containerPort": 8080
+    }
+  ],
   "deploymentConfiguration": {
     "maximumPercent": 200,
     "minimumHealthyPercent": 100,
