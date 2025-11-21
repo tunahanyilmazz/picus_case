@@ -14,6 +14,7 @@ env:
   ECS_CLUSTER: picus-cluster
   ECS_TASK_DEFINITION: picus-task-definition
   CONTAINER_NAME: picus-flask-app
+  LAMBDA_ROLE_ARN: arn:aws:iam::824912998004:role/picus-lambda-role
 
 jobs:
   test:
@@ -131,169 +132,23 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
     
-    - name: Install Python dependencies for Lambda
+    - name: Install dependencies and create package
       run: |
         pip install boto3 -t .
-    
-    - name: Create Lambda deployment package
-      run: |
         zip -r lambda-function.zip handler.py boto3* botocore* -x "*.pyc" -x "*__pycache__*"
     
-    - name: Create or get Lambda IAM role
-      id: lambda-role
-      run: |
-        ROLE_NAME="picus-lambda-role"
-        
-        # Check if role exists
-        if aws iam get-role --role-name $ROLE_NAME --region ${{ env.AWS_REGION }} 2>/dev/null; then
-          echo "Role exists, getting ARN..."
-          ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME --query 'Role.Arn' --output text --region ${{ env.AWS_REGION }})
-        else
-          echo "Creating IAM role for Lambda..."
-          
-          # Create trust policy
-          cat > lambda-trust-policy.json << 'EOF'
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        }
-        EOF
-          
-          # Create role
-          aws iam create-role \
-            --role-name $ROLE_NAME \
-            --assume-role-policy-document file://lambda-trust-policy.json \
-            --region ${{ env.AWS_REGION }}
-          
-          # Attach basic Lambda execution policy
-          aws iam attach-role-policy \
-            --role-name $ROLE_NAME \
-            --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
-            --region ${{ env.AWS_REGION }}
-          
-          # Create and attach DynamoDB policy
-          cat > lambda-dynamodb-policy.json << EOF
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "dynamodb:DeleteItem",
-                "dynamodb:GetItem"
-              ],
-              "Resource": "arn:aws:dynamodb:${{ env.AWS_REGION }}:${{ env.AWS_ACCOUNT_ID }}:table/picus_data"
-            }
-          ]
-        }
-        EOF
-          
-          aws iam put-role-policy \
-            --role-name $ROLE_NAME \
-            --policy-name DynamoDBAccess \
-            --policy-document file://lambda-dynamodb-policy.json \
-            --region ${{ env.AWS_REGION }}
-          
-          ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME --query 'Role.Arn' --output text --region ${{ env.AWS_REGION }})
-          
-          echo "⏳ Waiting for role to be ready..."
-          sleep 10
-        fi
-        
-        echo "role_arn=$ROLE_ARN" >> $GITHUB_OUTPUT
-        echo "✅ Using role: $ROLE_ARN"
-    
-    - name: Deploy Lambda function with AWS CLI
+    - name: Deploy Lambda function
       run: |
         FUNCTION_NAME="picus-delete-function"
-        ROLE_ARN="${{ steps.lambda-role.outputs.role_arn }}"
-        MAX_RETRIES=5
-        RETRY_DELAY=10
-        
-        # Function'ın update durumunu kontrol et ve bekle
-        wait_for_function_ready() {
-          local retries=0
-          while [ $retries -lt $MAX_RETRIES ]; do
-            STATUS=$(aws lambda get-function \
-              --function-name $FUNCTION_NAME \
-              --region ${{ env.AWS_REGION }} \
-              --query 'Configuration.LastUpdateStatus' \
-              --output text 2>/dev/null || echo "NOT_FOUND")
-            
-            if [ "$STATUS" == "Successful" ] || [ "$STATUS" == "NOT_FOUND" ]; then
-              echo "✅ Function is ready (Status: $STATUS)"
-              return 0
-            elif [ "$STATUS" == "InProgress" ]; then
-              echo "⏳ Function update in progress, waiting... (Status: $STATUS)"
-              sleep $RETRY_DELAY
-              retries=$((retries + 1))
-            else
-              echo "⚠️  Function status: $STATUS, waiting..."
-              sleep $RETRY_DELAY
-              retries=$((retries + 1))
-            fi
-          done
-          echo "❌ Function not ready after $MAX_RETRIES retries"
-          return 1
-        }
-        
-        # Check if function exists
         if aws lambda get-function --function-name $FUNCTION_NAME --region ${{ env.AWS_REGION }} 2>/dev/null; then
-          echo "📝 Updating existing function..."
-          
-          # Function'ın hazır olmasını bekle
-          wait_for_function_ready
-          
-          # Update function code
-          echo "📦 Updating function code..."
-          aws lambda update-function-code \
-            --function-name $FUNCTION_NAME \
-            --zip-file fileb://lambda-function.zip \
-            --region ${{ env.AWS_REGION }}
-          
-          # Code update'in tamamlanmasını bekle
-          wait_for_function_ready
-          
-          # Update environment variables
-          echo "⚙️  Updating function configuration..."
-          aws lambda update-function-configuration \
-            --function-name $FUNCTION_NAME \
-            --environment "Variables={DYNAMODB_TABLE_NAME=picus_data}" \
-            --region ${{ env.AWS_REGION }} || echo "⚠️  Configuration update may have failed, but continuing..."
-          
-          echo "✅ Lambda function updated successfully!"
+          aws lambda update-function-code --function-name $FUNCTION_NAME \
+            --zip-file fileb://lambda-function.zip --region ${{ env.AWS_REGION }}
         else
-          echo "🆕 Creating new Lambda function..."
-          aws lambda create-function \
-            --function-name $FUNCTION_NAME \
-            --runtime python3.10 \
-            --role $ROLE_ARN \
-            --handler handler.delete_item \
-            --zip-file fileb://lambda-function.zip \
-            --timeout 30 \
-            --memory-size 256 \
+          aws lambda create-function --function-name $FUNCTION_NAME \
+            --runtime python3.10 --role "${{ env.LAMBDA_ROLE_ARN }}" \
+            --handler handler.delete_item --zip-file fileb://lambda-function.zip \
+            --timeout 30 --memory-size 256 \
             --environment "Variables={DYNAMODB_TABLE_NAME=picus_data}" \
-            --architecture x86_64 \
-            --region ${{ env.AWS_REGION }}
-          
-          echo "✅ Lambda function created successfully!"
+            --architecture x86_64 --region ${{ env.AWS_REGION }}
         fi
-    
-    - name: Create API Gateway (if needed)
-      run: |
-        FUNCTION_NAME="picus-delete-function"
-        
-        # Check if API Gateway already exists (this is a simplified check)
-        # In production, you might want to use a more robust method
-        echo "ℹ️  API Gateway configuration can be done via AWS Console or Terraform"
-        echo "Function URL can be created with:"
-        echo "  aws lambda create-function-url-config --function-name $FUNCTION_NAME --auth-type NONE"
 
