@@ -96,4 +96,9 @@ urllib3/
 /bin
 six.py
 *.json
+!policies/*.json
 PROJECT_DOCUMENTATION.md
+test-lambda.sh
+deploy-lambda-manual.sh
+test-flask-endpoints.sh
+test-event.json

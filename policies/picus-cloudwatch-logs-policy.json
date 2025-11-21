@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchLogsPicus",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-central-1:824912998004:log-group:/ecs/picus-*",
+        "arn:aws:logs:eu-central-1:824912998004:log-group:/ecs/picus-*:*",
+        "arn:aws:logs:eu-central-1:824912998004:log-group:/aws/lambda/picus-*",
+        "arn:aws:logs:eu-central-1:824912998004:log-group:/aws/lambda/picus-*:*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogsList",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+

@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECSPicusResources",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:CreateCluster",
+        "ecs:DescribeClusters",
+        "ecs:CreateService",
+        "ecs:DescribeServices",
+        "ecs:UpdateService",
+        "ecs:RegisterTaskDefinition",
+        "ecs:DescribeTaskDefinition",
+        "ecs:ListTasks",
+        "ecs:DescribeTasks"
+      ],
+      "Resource": [
+        "arn:aws:ecs:eu-central-1:824912998004:cluster/picus-cluster",
+        "arn:aws:ecs:eu-central-1:824912998004:service/picus-cluster/picus-flask-service",
+        "arn:aws:ecs:eu-central-1:824912998004:task-definition/picus-task-definition:*",
+        "arn:aws:ecs:eu-central-1:824912998004:task/picus-cluster/*"
+      ]
+    },
+    {
+      "Sid": "ECSListAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:ListClusters",
+        "ecs:ListServices",
+        "ecs:ListTaskDefinitions",
+        "ecs:ListTasks"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+

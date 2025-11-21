@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:CreateFunction",
+        "lambda:GetFunction",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:InvokeFunction",
+        "lambda:AddPermission"
+      ],
+      "Resource": "arn:aws:lambda:eu-central-1:824912998004:function:picus-delete-function"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "lambda:ListFunctions",
+      "Resource": "*"
+    }
+  ]
+}
+
