@@ -108,3 +108,4 @@ iam-roles-setup.sh
 dynamodb-policy.json
 ecs-execution-trust-policy.json
 ecs-task-trust-policy.json
+/personal_file

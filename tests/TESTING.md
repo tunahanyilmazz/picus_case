@@ -27,8 +27,8 @@ python test_app.py
 - Must pass before deployment proceeds
 
 **Test Results:**
-- ✅ App imports successfully
-- ✅ Handler imports successfully
+-  App imports successfully
+-  Handler imports successfully
 
 ---
 
@@ -238,48 +238,11 @@ Running basic import tests...
 
 ### Current Coverage
 
-- ✅ **Unit Tests:** Import validation
-- ✅ **Integration Tests:** All CRUD operations
-- ✅ **E2E Tests:** Complete workflow
-- ✅ **Error Handling:** Invalid requests, error responses
-- ✅ **Health Checks:** ECS and ALB health validation
-
-### Future Improvements
-
-- [ ] Unit tests with pytest
-- [ ] Mock DynamoDB for unit tests
-- [ ] Integration tests with testcontainers
-- [ ] Load testing with Apache Bench or k6
-- [ ] Automated E2E tests in CI/CD
-- [ ] Code coverage reporting
-
----
-
-## Test Execution
-
-### Local Testing
-
-```bash
-# Unit tests
-python test_app.py
-
-# Integration tests (requires AWS credentials)
-export AWS_ACCESS_KEY_ID=your-key
-export AWS_SECRET_ACCESS_KEY=your-secret
-export AWS_DEFAULT_REGION=eu-central-1
-
-# Test endpoints
-curl http://picus-alb-1673797137.eu-central-1.elb.amazonaws.com/health
-curl http://picus-alb-1673797137.eu-central-1.elb.amazonaws.com/picus/list
-```
-
-### CI/CD Testing
-
-- Automatic execution on push to `main`
-- No manual intervention required
-- Test results visible in GitHub Actions
-
----
+-  **Unit Tests:** Import validation
+-  **Integration Tests:** All CRUD operations
+-  **E2E Tests:** Complete workflow
+-  **Error Handling:** Invalid requests, error responses
+-  **Health Checks:** ECS and ALB health validation
 
 
 **Last Updated:** 2025-11-20  
