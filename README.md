@@ -66,7 +66,7 @@ Application Load Balancer (ALB)
 | **Database** | Amazon DynamoDB | NoSQL data store |
 | **Load Balancing** | Application Load Balancer | Traffic routing |
 | **CI/CD** | GitHub Actions | Automated deployment |
-| **Infrastructure as Code** | AWS CLI, JSON configs | Resource management |
+| **Deployment** | AWS CLI, JSON configs | Configuration-driven deployment (ECS: JSON configs, Lambda: AWS CLI) |
 
 ---
 
@@ -377,9 +377,9 @@ For detailed API documentation, see [`API_DOCUMENTATION.md`](API_DOCUMENTATION.m
 
 ---
 
-## Infrastructure as Code
+## Configuration Files
 
-### Configuration Files
+### Deployment Configuration
 
 1. **`ecs-task-definition.json`**
    - Task definition with container configuration
@@ -394,10 +394,10 @@ For detailed API documentation, see [`API_DOCUMENTATION.md`](API_DOCUMENTATION.m
    - Deployment strategy
    - Load balancer configuration
 
-3. **`serverless.yml`**
-   - Lambda function configuration
-   - IAM role statements
-   - Environment variables
+3. **Lambda Deployment (AWS CLI)**
+   - Lambda function deployed via AWS CLI in CI/CD pipeline
+   - IAM role created/updated automatically
+   - Environment variables configured via AWS CLI
 
 4. **IAM Policies (`policies/` directory)**
    - All least-privilege IAM policies are stored in the `policies/` directory
@@ -415,7 +415,7 @@ This project follows AWS best practices and case requirements:
 - **Reliability:** Health checks for all components, error handling, high availability (2 ECS tasks)
 - **Scalability:** Stateless design, auto-scaling ready, load balancing, on-demand DynamoDB
 - **Observability:** CloudWatch Logs integration, health check endpoints, structured logging
-- **DevOps:** Automated CI/CD pipeline, Infrastructure as Code, version control
+- **DevOps:** Automated CI/CD pipeline, configuration-driven deployment, version control
 
 
 
