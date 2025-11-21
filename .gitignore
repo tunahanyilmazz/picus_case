@@ -98,7 +98,13 @@ six.py
 *.json
 !policies/*.json
 PROJECT_DOCUMENTATION.md
+# Test and deployment scripts
 test-lambda.sh
 deploy-lambda-manual.sh
 test-flask-endpoints.sh
 test-event.json
+iam-roles-setup.sh
+# IAM policy files (not in policies/)
+dynamodb-policy.json
+ecs-execution-trust-policy.json
+ecs-task-trust-policy.json
