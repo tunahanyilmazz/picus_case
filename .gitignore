@@ -52,9 +52,13 @@ Thumbs.db
 .aws/
 *.pem
 
-# Markdown files (except README.md)
+# Markdown files (except documentation files)
 *.md
 !README.md
+!PROJECT_DOCUMENTATION.md
+!API_DOCUMENTATION.md
+!tests/TESTING.md
+!policies/README.md
 
 # Logs
 *.log
@@ -92,3 +96,4 @@ urllib3/
 /bin
 six.py
 *.json
+PROJECT_DOCUMENTATION.md
